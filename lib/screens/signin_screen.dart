@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -27,8 +30,8 @@ class _SignInScreenState extends State<SignInScreen> {
               // Logo / wordmark
               Text('TravelGenie',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 28, fontWeight: FontWeight.w800, color: TGColors.primary
+                  style: GoogleFonts.poppins(
+                    fontSize: 28, fontWeight: FontWeight.w600, color: TGColors.primary
                   )),
               const SizedBox(height: 24),
 
@@ -81,7 +84,9 @@ class _SignInScreenState extends State<SignInScreen> {
               const SizedBox(height: 6),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) context.go('/home');
+                  if (_formKey.currentState!.validate()) {
+                    GoRouter.of(context).go('/home');
+                  }
                 },
                 child: const Text('Sign In'),
               ),
@@ -100,14 +105,11 @@ class _SignInScreenState extends State<SignInScreen> {
                 ],
               ),
 
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Google Sign-In (prototype)')),
-                ),
-                icon: const Icon(Icons.g_translate),
-                label: const Text('Continue with Google'),
+              SignInButton(
+                Buttons.Google,
+                onPressed: () {},
               ),
+
             ],
           ),
         ),

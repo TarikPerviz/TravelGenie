@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_signin_button/button_list.dart';
+import 'package:flutter_signin_button/button_view.dart';
 import 'package:go_router/go_router.dart';
 import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -27,8 +30,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 8),
               Text('TravelGenie',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.w800, color: TGColors.primary)),
+                  style: GoogleFonts.poppins(
+                    fontSize: 28, fontWeight: FontWeight.w600, color: TGColors.primary
+                  )),
               const SizedBox(height: 24),
 
               Text('Sign up now',
@@ -96,14 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ],
               ),
 
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Google Sign-In (prototype)')),
-                ),
-                icon: const Icon(Icons.g_translate),
-                label: const Text('Continue with Google'),
-              ),
+              
             ],
           ),
         ),
