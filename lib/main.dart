@@ -1,55 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'theme.dart';
+
+// Auth
 import 'screens/signin_screen.dart';
 import 'screens/signup_screen.dart';
-import 'screens/home_screen.dart';
+
+// Tabs
+import 'screens/home_tab.dart';
+import 'screens/trips_tab.dart';
+import 'screens/explore_tab.dart';
+import 'screens/groups_tab.dart';
+import 'screens/profile_tab.dart';
+
+import 'widgets/tg_nav_bar.dart';
 
 void main() => runApp(const TravelGenieApp());
 
 class TravelGenieApp extends StatelessWidget {
   const TravelGenieApp({super.key});
 
+  static const _routes = ['/home', '/trips', '/explore', '/groups', '/profile'];
+
+  int _indexFromLocation(String loc) {
+    final i = _routes.indexWhere((r) => loc.startsWith(r));
+    return i == -1 ? 0 : i;
+  }
+
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
-      // Za brzi prototip:
+      // za prototip testiraj sa /home; za realni flow koristi /signin
       // initialLocation: '/home',
-      // Za realni flow s prijavom:
       initialLocation: '/signin',
 
       routes: [
-        GoRoute(
-          name: 'signin',
-          path: '/signin',
-          pageBuilder: (context, state) => _transitionPage(
-            key: state.pageKey,
-            child: const SignInScreen(),
-          ),
-        ),
-        GoRoute(
-          name: 'signup',
-          path: '/signup',
-          pageBuilder: (context, state) => _transitionPage(
-            key: state.pageKey,
-            child: const SignUpScreen(),
-          ),
-        ),
-        GoRoute(
-          name: 'home',
-          path: '/home',
-          pageBuilder: (context, state) => _transitionPage(
-            key: state.pageKey,
-            child: const HomeScreen(),
-          ),
+        // AUTH rute van Shell-a
+        GoRoute(path: '/signin', builder: (_, __) => const SignInScreen()),
+        GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
+
+        // SHELL sa zajedničkim navbarom
+        ShellRoute(
+          builder: (context, state, child) {
+            final idx = _indexFromLocation(state.matchedLocation);
+            return Scaffold(
+              backgroundColor: const Color(0xFFF7F8FA),
+              body: SafeArea(
+                top: true,
+                bottom: false, // bottom već štiti TGNavBar
+                child: child,
+              ),
+              bottomNavigationBar: TGNavBar(
+                currentIndex: idx,
+                onItemSelected: (i) => context.go(_routes[i]),
+              ),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: '/home',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const HomeTab(),
+              ),
+            ),
+            GoRoute(
+              path: '/trips',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const TripsTab(),
+              ),
+            ),
+            GoRoute(
+              path: '/explore',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const ExploreTab(),
+              ),
+            ),
+            GoRoute(
+              path: '/groups',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const GroupsTab(),
+              ),
+            ),
+            GoRoute(
+              path: '/profile',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const ProfileTab(),
+              ),
+            ),
+          ],
         ),
       ],
-
-      // Ako ruta ne postoji — pošalji na signin.
-      errorPageBuilder: (context, state) => _transitionPage(
-        key: state.pageKey,
-        child: const SignInScreen(),
-      ),
     );
 
     return MaterialApp.router(
@@ -61,7 +106,6 @@ class TravelGenieApp extends StatelessWidget {
   }
 }
 
-/// iOS-like fade+slide tranzicija koja radi i na Androidu bez dodatnih paketa.
 CustomTransitionPage _transitionPage({
   required LocalKey key,
   required Widget child,
@@ -69,18 +113,14 @@ CustomTransitionPage _transitionPage({
   return CustomTransitionPage(
     key: key,
     child: child,
-    transitionDuration: const Duration(milliseconds: 250),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final offsetTween =
+    transitionDuration: const Duration(milliseconds: 220),
+    transitionsBuilder: (context, animation, secondary, child) {
+      final slide =
           Tween<Offset>(begin: const Offset(0.02, 0), end: Offset.zero)
               .chain(CurveTween(curve: Curves.easeOutCubic));
-
       return FadeTransition(
         opacity: animation,
-        child: SlideTransition(
-          position: animation.drive(offsetTween),
-          child: child,
-        ),
+        child: SlideTransition(position: animation.drive(slide), child: child),
       );
     },
   );

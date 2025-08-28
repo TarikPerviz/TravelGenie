@@ -1,25 +1,74 @@
 import 'package:flutter/material.dart';
-import '../widgets/tg_nav_bar.dart';
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+import 'package:flutter/services.dart';
+class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return CustomScrollView(
+      slivers: [
+        const SliverToBoxAdapter(child: _TopBar()),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+            child: _HeroTitle(),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: _SectionHeader(
+            title: "Best Destination",
+            actionText: "View all",
+            onAction: () {},
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 270,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: _mockDestinations.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              itemBuilder: (context, i) =>
+                  DestinationCard(data: _mockDestinations[i]),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        SliverToBoxAdapter(
+          child: _SectionHeader(
+            title: "News",
+            actionText: "View all",
+            onAction: () {},
+          ),
+        ),
+        SliverList.builder(
+          itemCount: 4,
+          itemBuilder: (_, i) => const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: _NewsItemPlaceholder(),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ],
+    );
+  }
+}
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        toolbarHeight: 64,
-        titleSpacing: 16,
-        title: Row(
+class _TopBar extends StatelessWidget {
+  const _TopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.white, // Android; na iOS je transparentno
+      ),
+      child: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+        child: Row(
           children: [
-            // Profile chip (ikonica + ime Tarik)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
@@ -36,20 +85,13 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(width: 8),
                   Text(
                     'Tarik',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Container(
+            const Spacer(),
+            Container(
               width: 36,
               height: 36,
               decoration: const BoxDecoration(
@@ -59,87 +101,17 @@ class HomeScreen extends StatelessWidget {
               child: IconButton(
                 tooltip: 'Notifications',
                 splashRadius: 22,
-                icon: const Icon(Icons.notifications_none_rounded,
-                    color: Colors.black87, size: 20),
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: Colors.black87,
+                  size: 20,
+                ),
                 onPressed: () {},
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-
-      body: CustomScrollView(
-        slivers: [
-          // Title hero
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-              child: _HeroTitle(),
-            ),
-          ),
-
-          // Best Destination header
-          SliverToBoxAdapter(
-            child: _SectionHeader(
-              title: "Best Destination",
-              actionText: "View all",
-              onAction: () {},
-            ),
-          ),
-
-          // Horizontal cards
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 270,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: _mockDestinations.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (context, i) =>
-                    DestinationCard(data: _mockDestinations[i]),
-              ),
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-          // News header
-          SliverToBoxAdapter(
-            child: _SectionHeader(
-              title: "News",
-              actionText: "View all",
-              onAction: () {},
-            ),
-          ),
-
-          // News list (placeholders)
-          SliverList.builder(
-            itemCount: 4,
-            itemBuilder: (_, i) => Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: const _NewsItemPlaceholder(),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
-
-      // Bottom nav – vizuelno blisko screenshotu
-      bottomNavigationBar: TGNavBar(
-  currentIndex: 0, // Home = 0, Trips = 1, Explore = 2, Groups = 3, Profile = 4
-  onItemSelected: (i) {
-    // Ako koristiš go_router:
-    // final routes = ['/home', '/trips', '/explore', '/groups', '/profile'];
-    // context.go(routes[i]);
-
-    // Za sada samo demo:
-    if (i == 2) {
-      // open Explore prototype
-    }
-  },
-),
-
     );
   }
 }
@@ -159,15 +131,9 @@ class _HeroTitle extends StatelessWidget {
         ),
         children: const [
           TextSpan(text: "Explore the "),
-          TextSpan(
-            text: "world!",
-            style: TextStyle(color: Color(0xFFFF7A00)),
-          ),
+          TextSpan(text: "world!", style: TextStyle(color: Color(0xFFFF7A00))),
           TextSpan(text: "\nwith "),
-          TextSpan(
-            text: "TravelGenie",
-            style: TextStyle(color: Color(0xFF2F6BFF)),
-          ),
+          TextSpan(text: "TravelGenie", style: TextStyle(color: Color(0xFF2F6BFF))),
         ],
       ),
     );
@@ -178,12 +144,8 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final String actionText;
   final VoidCallback onAction;
-
-  const _SectionHeader({
-    required this.title,
-    required this.actionText,
-    required this.onAction,
-  });
+  const _SectionHeader(
+      {required this.title, required this.actionText, required this.onAction});
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +154,6 @@ class _SectionHeader extends StatelessWidget {
           color: Colors.black87,
           letterSpacing: -0.2,
         );
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
       child: Row(
@@ -239,7 +200,6 @@ class DestinationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMAGE PLACEHOLDER
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: Container(
@@ -251,8 +211,6 @@ class DestinationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Title
             Text(
               data.title,
               maxLines: 1,
@@ -264,8 +222,6 @@ class DestinationCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 6),
-
-            // Rating
             Row(
               children: [
                 const Icon(Icons.star_rounded,
@@ -280,8 +236,6 @@ class DestinationCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-
-            // Location
             Row(
               children: [
                 const Icon(Icons.location_on_outlined,
@@ -359,34 +313,16 @@ class _NewsItemPlaceholder extends StatelessWidget {
   }
 }
 
-// --- Mock data for prototype ---
-
+// Mock data
 class Destination {
   final String title;
   final String subtitle;
   final double rating;
-
-  const Destination({
-    required this.title,
-    required this.subtitle,
-    required this.rating,
-  });
+  const Destination({required this.title, required this.subtitle, required this.rating});
 }
 
 const _mockDestinations = <Destination>[
-  Destination(
-    title: "Hotel Indigo Vienna",
-    subtitle: "Vienna, Austria",
-    rating: 4.7,
-  ),
-  Destination(
-    title: "Darmas Beach Resort",
-    subtitle: "Bali, Indonesia",
-    rating: 4.6,
-  ),
-  Destination(
-    title: "Grand Alpine Lodge",
-    subtitle: "Zermatt, Switzerland",
-    rating: 4.8,
-  ),
+  Destination(title: "Hotel Indigo Vienna", subtitle: "Vienna, Austria", rating: 4.7),
+  Destination(title: "Darmas Beach Resort", subtitle: "Bali, Indonesia", rating: 4.6),
+  Destination(title: "Grand Alpine Lodge", subtitle: "Zermatt, Switzerland", rating: 4.8),
 ];
