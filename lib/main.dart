@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'theme.dart';
+import 'package:flutter/services.dart';
 
 // Auth
 import 'screens/signin_screen.dart';
@@ -15,7 +16,19 @@ import 'screens/profile_tab.dart';
 
 import 'widgets/tg_nav_bar.dart';
 
-void main() => runApp(const TravelGenieApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent, // providan nav bar
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark, // ikone tamne
+      statusBarColor: Colors.transparent, // već koristimo SafeArea
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
+  runApp(const TravelGenieApp());
+}
 
 class TravelGenieApp extends StatelessWidget {
   const TravelGenieApp({super.key});
@@ -32,7 +45,7 @@ class TravelGenieApp extends StatelessWidget {
     final router = GoRouter(
       // za prototip testiraj sa /home; za realni flow koristi /signin
       // initialLocation: '/home',
-      initialLocation: '/signin',
+      initialLocation: '/home',
 
       routes: [
         // AUTH rute van Shell-a

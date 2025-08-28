@@ -125,7 +125,7 @@ class _HeroTitle extends StatelessWidget {
       text: TextSpan(
         style: base.copyWith(
           height: 1.1,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w600,
           color: Colors.black,
           letterSpacing: -0.2,
         ),

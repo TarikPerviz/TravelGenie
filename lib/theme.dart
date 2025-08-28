@@ -1,5 +1,5 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class TGColors {
   static const primary = Color(0xFF1061FF); // tvoj plavi
@@ -12,8 +12,14 @@ ThemeData tgTheme() {
     colorScheme: ColorScheme.fromSeed(seedColor: TGColors.primary),
     useMaterial3: true,
   );
+
+  // iOS => null (koristi SF Pro Display automatski)
+  // Android => Inter (iz assets/fonts/)
+  final fontFamily = Platform.isIOS ? null : 'Inter';
+
   return base.copyWith(
-    textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
+    textTheme: base.textTheme.apply(
+      fontFamily: fontFamily,
       bodyColor: TGColors.text,
       displayColor: TGColors.text,
     ),
@@ -42,6 +48,11 @@ ThemeData tgTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
-    appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+    appBarTheme: const AppBarTheme(
+      centerTitle: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      foregroundColor: TGColors.text,
+    ),
   );
 }
