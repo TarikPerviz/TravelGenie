@@ -13,12 +13,43 @@ class TravelGenieApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
+      // Za brzi prototip:
+      // initialLocation: '/home',
+      // Za realni flow s prijavom:
       initialLocation: '/signin',
+
       routes: [
-        GoRoute(path: '/signin', builder: (_, __) => const SignInScreen()),
-        GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
-        GoRoute(path: '/home',   builder: (_, __) => const HomeScreen()),
+        GoRoute(
+          name: 'signin',
+          path: '/signin',
+          pageBuilder: (context, state) => _transitionPage(
+            key: state.pageKey,
+            child: const SignInScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'signup',
+          path: '/signup',
+          pageBuilder: (context, state) => _transitionPage(
+            key: state.pageKey,
+            child: const SignUpScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'home',
+          path: '/home',
+          pageBuilder: (context, state) => _transitionPage(
+            key: state.pageKey,
+            child: const HomeScreen(),
+          ),
+        ),
       ],
+
+      // Ako ruta ne postoji — pošalji na signin.
+      errorPageBuilder: (context, state) => _transitionPage(
+        key: state.pageKey,
+        child: const SignInScreen(),
+      ),
     );
 
     return MaterialApp.router(
@@ -28,4 +59,29 @@ class TravelGenieApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
     );
   }
+}
+
+/// iOS-like fade+slide tranzicija koja radi i na Androidu bez dodatnih paketa.
+CustomTransitionPage _transitionPage({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final offsetTween =
+          Tween<Offset>(begin: const Offset(0.02, 0), end: Offset.zero)
+              .chain(CurveTween(curve: Curves.easeOutCubic));
+
+      return FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: animation.drive(offsetTween),
+          child: child,
+        ),
+      );
+    },
+  );
 }
