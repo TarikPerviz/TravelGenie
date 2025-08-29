@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+class AccountScreen extends StatelessWidget {
+  const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // MOCK PODACI — u MVP-ju napuniš iz backenda
+    // isti mock kao na profilu
     const tripsCreated = 5;
     const tripsFinished = 4;
-    const averageBookingCost = 359; // USD prosjek "booking" tripa
+    const averageBookingCost = 359;
 
     return CustomScrollView(
       slivers: [
@@ -26,7 +25,7 @@ class ProfileTab extends StatelessWidget {
             ),
           ),
         ),
-        // Stats card
+        // Stats card (isti kao na profilu)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -38,28 +37,18 @@ class ProfileTab extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        // Settings group
+        // LISTA OPCIJA — samo druge stavke
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _SettingsGroup(items: [
+            child: const _SettingsGroup(items: [
               _SettingsItemData(
-                icon: Icons.person_outline,
-                label: "Account",
-                onTap: () => context.push('/profile/account'),
-              ),
-              const _SettingsItemData(
-                icon: Icons.favorite_border,
-                label: "Favourite",
-              ),
-              const _SettingsItemData(
-                icon: Icons.volunteer_activism_outlined,
-                label: "Donate",
+                icon: Icons.alternate_email_outlined,
+                label: "Change Email",
               ),
               _SettingsItemData(
-                icon: Icons.settings_outlined,
-                label: "Settings",
-                onTap: () => context.push('/profile/settings'), // 👈 dodano
+                icon: Icons.lock_outline,
+                label: "Change Password",
               ),
             ]),
           ),
@@ -82,30 +71,22 @@ class _TopBar extends StatelessWidget {
         children: [
           _CircleIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () {
-              // u tab-nav kontekstu nema back, pa samo no-op ili kasnije otvori settings stack
-            },
+            onTap: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
           const Text(
-            "Profile",
+            "Account",
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
           ),
           const Spacer(),
-          _CircleIconButton(
-            icon: Icons.edit_outlined,
-            onTap: () {
-              // koristi go_router
-              // context.go('/profile/edit');  // ako želiš zamjenu rute
-              context.push('/profile/edit');   // ako želiš stack (može back)
-            },
-          ),
-
+          // 👇 maknuli smo edit dugme, ostaje prazno mjesto da naslov bude centriran
+          const SizedBox(width: 36), 
         ],
       ),
     );
   }
 }
+
 
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
@@ -146,7 +127,7 @@ class _AvatarBlock extends StatelessWidget {
       children: const [
         CircleAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC), // roze iz Figma vibe-a
+          backgroundColor: Color(0xFFFFE3EC),
           child: Icon(Icons.person, size: 44, color: Colors.black54),
         ),
         SizedBox(height: 10),
@@ -206,7 +187,6 @@ class _StatsCard extends StatelessWidget {
           _DividerY(),
           _StatCell(
             label: "Average Cost",
-            // napomena: ovo je prosjek **booking tripa**
             value: Text("\$${averageCostUSD.toStringAsFixed(0)}", style: valueStyle),
           ),
         ],

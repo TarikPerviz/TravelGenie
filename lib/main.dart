@@ -13,6 +13,9 @@ import 'screens/trips_tab.dart';
 import 'screens/explore_tab.dart';
 import 'screens/groups_tab.dart';
 import 'screens/profile_tab.dart';
+import 'screens/edit_profile_screen.dart';
+import 'screens/account_screen.dart';
+import 'screens/settings_screen.dart';
 
 import 'widgets/tg_nav_bar.dart';
 
@@ -103,6 +106,27 @@ class TravelGenieApp extends StatelessWidget {
               pageBuilder: (context, state) => _transitionPage(
                 key: state.pageKey,
                 child: const ProfileTab(),
+              ),
+            ),
+            GoRoute(
+              path: '/profile/edit',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const EditProfileScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/profile/account',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const AccountScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/profile/settings',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const SettingsScreen(),
               ),
             ),
           ],

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool darkMode = false;
 
   @override
   Widget build(BuildContext context) {
-    // MOCK PODACI — u MVP-ju napuniš iz backenda
     const tripsCreated = 5;
     const tripsFinished = 4;
-    const averageBookingCost = 359; // USD prosjek "booking" tripa
+    const averageBookingCost = 359;
 
     return CustomScrollView(
       slivers: [
@@ -26,7 +31,6 @@ class ProfileTab extends StatelessWidget {
             ),
           ),
         ),
-        // Stats card
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -38,30 +42,79 @@ class ProfileTab extends StatelessWidget {
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
         // Settings group
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _SettingsGroup(items: [
-              _SettingsItemData(
-                icon: Icons.person_outline,
-                label: "Account",
-                onTap: () => context.push('/profile/account'),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x143C4B64),
+                    blurRadius: 14,
+                    offset: Offset(0, 8),
+                  ),
+                ],
               ),
-              const _SettingsItemData(
-                icon: Icons.favorite_border,
-                label: "Favourite",
+              child: Column(
+                children: [
+                  // Dark mode toggle row
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.dark_mode_outlined, color: Colors.black54),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            "Dark Mode",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Switch(
+                          value: darkMode,
+                          activeColor: const Color(0xFF1061FF),
+                          onChanged: (val) => setState(() => darkMode = val),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1, thickness: 1, color: Color(0xFFF0F2F6)),
+
+                  // Log Out row
+                  InkWell(
+                    onTap: () {
+                      // TODO: implement real logout
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Logged out")),
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.red),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Log Out",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: Colors.black38),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const _SettingsItemData(
-                icon: Icons.volunteer_activism_outlined,
-                label: "Donate",
-              ),
-              _SettingsItemData(
-                icon: Icons.settings_outlined,
-                label: "Settings",
-                onTap: () => context.push('/profile/settings'), // 👈 dodano
-              ),
-            ]),
+            ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 28)),
@@ -82,25 +135,15 @@ class _TopBar extends StatelessWidget {
         children: [
           _CircleIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () {
-              // u tab-nav kontekstu nema back, pa samo no-op ili kasnije otvori settings stack
-            },
+            onTap: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
           const Text(
-            "Profile",
+            "Settings",
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
           ),
           const Spacer(),
-          _CircleIconButton(
-            icon: Icons.edit_outlined,
-            onTap: () {
-              // koristi go_router
-              // context.go('/profile/edit');  // ako želiš zamjenu rute
-              context.push('/profile/edit');   // ako želiš stack (može back)
-            },
-          ),
-
+          const SizedBox(width: 36), // balans da ostane centrirano
         ],
       ),
     );
@@ -146,7 +189,7 @@ class _AvatarBlock extends StatelessWidget {
       children: const [
         CircleAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC), // roze iz Figma vibe-a
+          backgroundColor: Color(0xFFFFE3EC),
           child: Icon(Icons.person, size: 44, color: Colors.black54),
         ),
         SizedBox(height: 10),
@@ -177,10 +220,6 @@ class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: const Color(0xFF6C7480),
-          fontWeight: FontWeight.w600,
-        );
     final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
           color: const Color(0xFF1061FF),
           fontWeight: FontWeight.w700,
@@ -194,21 +233,11 @@ class _StatsCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _StatCell(
-            label: "Trips created",
-            value: Text("$tripsCreated", style: valueStyle),
-          ),
+          _StatCell(label: "Trips created", value: "$tripsCreated"),
           _DividerY(),
-          _StatCell(
-            label: "Trips finished",
-            value: Text("$tripsFinished", style: valueStyle),
-          ),
+          _StatCell(label: "Trips finished", value: "$tripsFinished"),
           _DividerY(),
-          _StatCell(
-            label: "Average Cost",
-            // napomena: ovo je prosjek **booking tripa**
-            value: Text("\$${averageCostUSD.toStringAsFixed(0)}", style: valueStyle),
-          ),
+          _StatCell(label: "Average Cost", value: "\$$averageCostUSD"),
         ],
       ),
     );
@@ -217,7 +246,7 @@ class _StatsCard extends StatelessWidget {
 
 class _StatCell extends StatelessWidget {
   final String label;
-  final Widget value;
+  final String value;
   const _StatCell({required this.label, required this.value});
 
   @override
@@ -228,7 +257,13 @@ class _StatCell extends StatelessWidget {
         children: [
           Text(label, textAlign: TextAlign.center),
           const SizedBox(height: 6),
-          value,
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1061FF),
+            ),
+          ),
         ],
       ),
     );
@@ -243,76 +278,6 @@ class _DividerY extends StatelessWidget {
       height: 44,
       margin: const EdgeInsets.symmetric(horizontal: 6),
       color: const Color(0xFFD9E2FF),
-    );
-  }
-}
-
-class _SettingsGroup extends StatelessWidget {
-  final List<_SettingsItemData> items;
-  const _SettingsGroup({required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x143C4B64),
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          for (int i = 0; i < items.length; i++) ...[
-            _SettingsRow(data: items[i]),
-            if (i != items.length - 1)
-              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F2F6)),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _SettingsItemData {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-  const _SettingsItemData({
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
-}
-
-class _SettingsRow extends StatelessWidget {
-  final _SettingsItemData data;
-  const _SettingsRow({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: data.onTap ?? () {},
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Icon(data.icon, color: Colors.black54),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                data.label,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.black38),
-          ],
-        ),
-      ),
     );
   }
 }
