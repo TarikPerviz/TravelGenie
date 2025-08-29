@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -62,32 +63,42 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.white, // Android; na iOS je transparentno
+        statusBarColor: Colors.white,
       ),
       child: Container(
         color: Colors.white,
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F5F8),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: const [
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: Color(0xFFE7EBF0),
-                    child: Icon(Icons.person, size: 16, color: Colors.black54),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Tarik',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
-                  ),
-                ],
+            // 👇 Omotano u InkWell
+            InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => context.push('/profile'),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F5F8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: const [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Color(0xFFE7EBF0),
+                      child: Icon(Icons.person,
+                          size: 16, color: Colors.black54),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Tarik',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const Spacer(),

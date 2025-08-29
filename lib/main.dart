@@ -48,7 +48,7 @@ class TravelGenieApp extends StatelessWidget {
     final router = GoRouter(
       // za prototip testiraj sa /home; za realni flow koristi /signin
       // initialLocation: '/home',
-      initialLocation: '/home',
+      initialLocation: '/signin',
 
       routes: [
         // AUTH rute van Shell-a
