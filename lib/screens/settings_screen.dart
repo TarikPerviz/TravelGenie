@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:travelgenie/theme_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,23 +9,26 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool darkMode = false;
-
   @override
   Widget build(BuildContext context) {
+    // MOCK kao na ostalim screenovima (ako treba taj hero/consistency)
     const tripsCreated = 5;
     const tripsFinished = 4;
-    const averageBookingCost = 359;
+    const averageBookingCost = 359.0;
+
+    final theme = Theme.of(context);
+    final controller = AppTheme.of(context);
+    final isDark = controller.mode == ThemeMode.dark;
 
     return CustomScrollView(
       slivers: [
         const SliverToBoxAdapter(child: _TopBar()),
         SliverToBoxAdapter(
           child: Container(
-            color: Colors.white,
+            color: theme.scaffoldBackgroundColor,
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 _AvatarBlock(),
                 SizedBox(height: 12),
               ],
@@ -37,7 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: _StatsCard(
               tripsCreated: tripsCreated,
               tripsFinished: tripsFinished,
-              averageCostUSD: averageBookingCost.toDouble(),
+              averageCostUSD: averageBookingCost,
             ),
           ),
         ),
@@ -47,18 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x143C4B64),
-                    blurRadius: 14,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
+            child: _SettingsCard(
               child: Column(
                 children: [
                   // Dark mode toggle row
@@ -66,48 +59,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                     child: Row(
                       children: [
-                        const Icon(Icons.dark_mode_outlined, color: Colors.black54),
+                        Icon(Icons.dark_mode_outlined, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             "Dark Mode",
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
                         ),
                         Switch(
-                          value: darkMode,
-                          activeColor: const Color(0xFF1061FF),
-                          onChanged: (val) => setState(() => darkMode = val),
+                          value: isDark,
+                          onChanged: (val) => controller.setMode(val ? ThemeMode.dark : ThemeMode.light),
                         ),
                       ],
                     ),
                   ),
-                  const Divider(height: 1, thickness: 1, color: Color(0xFFF0F2F6)),
+                  Divider(height: 1, thickness: 1, color: theme.dividerColor),
 
                   // Log Out row
                   InkWell(
                     onTap: () {
-                      // TODO: implement real logout
+                      // TODO: real logout
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Logged out")),
                       );
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                       child: Row(
                         children: [
-                          Icon(Icons.logout, color: Colors.red),
-                          SizedBox(width: 12),
+                          Icon(Icons.logout, color: theme.colorScheme.error),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "Log Out",
-                              style: TextStyle(
+                              style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: Colors.red,
+                                color: theme.colorScheme.error,
                               ),
                             ),
                           ),
-                          Icon(Icons.chevron_right, color: Colors.black38),
+                          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
                         ],
                       ),
                     ),
@@ -128,8 +123,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.scaffoldBackgroundColor,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       child: Row(
         children: [
@@ -138,12 +134,14 @@ class _TopBar extends StatelessWidget {
             onTap: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
-          const Text(
+          Text(
             "Settings",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const Spacer(),
-          const SizedBox(width: 36), // balans da ostane centrirano
+          const SizedBox(width: 36), // balans, naslov centriran
         ],
       ),
     );
@@ -157,6 +155,10 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final chip = isDark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
+
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
@@ -164,17 +166,19 @@ class _CircleIconButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F5F8),
+          color: chip,
           shape: BoxShape.circle,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D000000),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            )
-          ],
+          boxShadow: isDark
+              ? null
+              : const [
+                  BoxShadow(
+                    color: Color(0x0D000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  )
+                ],
         ),
-        child: Icon(icon, size: 18, color: Colors.black87),
+        child: Icon(icon, size: 18, color: theme.colorScheme.onSurface),
       ),
     );
   }
@@ -185,22 +189,30 @@ class _AvatarBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return Column(
-      children: const [
-        CircleAvatar(
+      children: [
+        const CircleAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC),
+          backgroundColor: Color(0xFFFFE3EC), // dekorativno kao na profilu
           child: Icon(Icons.person, size: 44, color: Colors.black54),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           "Tarik",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           "tarik@gmail.com",
-          style: TextStyle(color: Color(0xFF8D929A), fontWeight: FontWeight.w500),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: onSurface.withValues(alpha: 0.6),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -220,15 +232,12 @@ class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: const Color(0xFF1061FF),
-          fontWeight: FontWeight.w700,
-        );
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF4FF),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -237,7 +246,7 @@ class _StatsCard extends StatelessWidget {
           _DividerY(),
           _StatCell(label: "Trips finished", value: "$tripsFinished"),
           _DividerY(),
-          _StatCell(label: "Average Cost", value: "\$$averageCostUSD"),
+          _StatCell(label: "Average Cost", value: "\$${averageCostUSD.toStringAsFixed(0)}"),
         ],
       ),
     );
@@ -251,17 +260,25 @@ class _StatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, textAlign: TextAlign.center),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1061FF),
+              color: theme.colorScheme.primary,
             ),
           ),
         ],
@@ -273,11 +290,41 @@ class _StatCell extends StatelessWidget {
 class _DividerY extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 1,
       height: 44,
       margin: const EdgeInsets.symmetric(horizontal: 6),
-      color: const Color(0xFFD9E2FF),
+      color: theme.dividerColor,
+    );
+  }
+}
+
+/// Card wrapper koji slijedi temu (shadow u light, bez u dark).
+class _SettingsCard extends StatelessWidget {
+  final Widget child;
+  const _SettingsCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: isDark
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x143C4B64),
+                  blurRadius: 14,
+                  offset: Offset(0, 8),
+                ),
+              ],
+      ),
+      child: child,
     );
   }
 }

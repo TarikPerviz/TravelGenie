@@ -6,9 +6,13 @@ class EditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tamne ikone na bijelom status baru (iOS look)
-    final overlay =
-        SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white);
+    final theme = Theme.of(context);
+    final bg = theme.scaffoldBackgroundColor;
+
+    // Status bar kontrast prema temi
+    final overlay = theme.brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light.copyWith(statusBarColor: bg)
+        : SystemUiOverlayStyle.dark.copyWith(statusBarColor: bg);
 
     // MOCK vrijednosti – u MVP-ju dolaze iz storage/backenda
     const firstName = 'Tarik';
@@ -20,46 +24,42 @@ class EditProfileScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlay,
       child: Scaffold(
-        backgroundColor: Colors.white, // ⬅️ bijela pozadina kao u Figmi
+        backgroundColor: bg,
         body: SafeArea(
           child: Column(
             children: [
               const SizedBox(height: 4),
-              _TopBar(
-                onBack: () => Navigator.of(context).maybePop(),
-                onDone: () => Navigator.of(context).maybePop(),
-              ),
+              const _TopBar(),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 8),
-
-                      // ➜ AVATAR SEKCIJA BEZ HORIZONTALNOG PADDINGA, CENTRIRANA
-                      const _AvatarBlock(name: 'Tarik'),
+                      // Avatar sekcija – centrirana kao na profilu
+                      const _AvatarSection(name: 'Tarik'),
                       const SizedBox(height: 22),
 
-                      // ➜ OSTATAK FORME SA LIJEVIM PORAVNANJEM I PADDINGOM
+                      // Forma – lijevo poravnanje
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: const [
                             _FieldLabel('First Name'),
-                            _FilledField(value: 'Tarik'),
+                            _FilledField(value: firstName),
                             SizedBox(height: 14),
 
                             _FieldLabel('Last Name'),
-                            _FilledField(value: 'Perviz'),
+                            _FilledField(value: lastName),
                             SizedBox(height: 14),
 
                             _FieldLabel('Location'),
-                            _FilledField(value: 'Sarajevo, Bosnia and Herzegovina'),
+                            _FilledField(value: location),
                             SizedBox(height: 14),
 
                             _FieldLabel('Mobile Number'),
-                            _PhoneField(dialCode: '+387', number: '061-111-222'),
+                            _PhoneField(dialCode: dialCode, number: phone),
                           ],
                         ),
                       ),
@@ -67,7 +67,6 @@ class EditProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
             ],
           ),
         ),
@@ -76,35 +75,44 @@ class EditProfileScreen extends StatelessWidget {
   }
 }
 
+/// Top bar kao na Profile ekranu: back — centriran naslov — (balans desno)
 class _TopBar extends StatelessWidget {
-  final VoidCallback onBack;
-  final VoidCallback onDone;
-  const _TopBar({required this.onBack, required this.onDone});
+  const _TopBar();
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.scaffoldBackgroundColor,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Row(
         children: [
           _CircleIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
-            onTap: onBack,
+            onTap: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
-          const Text('Edit Profile',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(
+            'Edit Profile',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const Spacer(),
-          GestureDetector(
-            onTap: onDone,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              child: Text(
-                'Done',
-                style: TextStyle(
-                  color: Color(0xFF1061FF),
-                  fontWeight: FontWeight.w700,
+          // “Done” poravnat kao ikonica (36px širine) da naslov ostane točno u sredini
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => Navigator.of(context).maybePop(),
+              child: Center(
+                child: Text(
+                  'Done',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -122,32 +130,37 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final chip =
+        theme.brightness == Brightness.dark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
+
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
       child: Container(
         width: 36,
         height: 36,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF3F5F8),
+        decoration: BoxDecoration(
+          color: chip,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: Colors.black87),
+        child: Icon(icon, size: 18, color: theme.colorScheme.onSurface),
       ),
     );
   }
 }
 
-class _AvatarBlock extends StatelessWidget {
+class _AvatarSection extends StatelessWidget {
   final String name;
-  const _AvatarBlock({required this.name});
+  const _AvatarSection({required this.name});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
-      width: double.infinity,                // ⬅️ zauzmi punu širinu
+      width: double.infinity,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // ⬅️ centriraj unutra
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const CircleAvatar(
             radius: 48,
@@ -155,14 +168,21 @@ class _AvatarBlock extends StatelessWidget {
             child: Icon(Icons.person, size: 52, color: Colors.black54),
           ),
           const SizedBox(height: 10),
-          Text(name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Change Profile Picture',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF1061FF), fontWeight: FontWeight.w700),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -170,49 +190,50 @@ class _AvatarBlock extends StatelessWidget {
   }
 }
 
-
-
 class _FieldLabel extends StatelessWidget {
   final String text;
   const _FieldLabel(this.text);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w700,
-          color: Colors.black87,
+          color: theme.colorScheme.onSurface,
         ),
       ),
     );
   }
 }
 
-/// Read-only kapsula: svijetlosiva (#F1F3F6), zaobljena 14, bez checkmarka.
+/// Read-only kapsula: svijetla u light, tamna u dark.
 class _FilledField extends StatelessWidget {
   final String value;
   const _FilledField({required this.value});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final pillColor =
+        theme.brightness == Brightness.dark ? const Color(0xFF1B1F27) : const Color(0xFFF5F7FA);
+
     return Container(
-      width: double.infinity, // ⬅️ cijela širina
-      height: 52,             // ⬅️ visina konzistentna
+      width: double.infinity,
+      height: 52,
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA), // svijetlosiva iz Figme
-        borderRadius: BorderRadius.circular(12), // blaži radius
+        color: pillColor,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         value,
-        style: const TextStyle(
+        style: theme.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w600,
-          fontSize: 16,
-          color: Colors.black87,
         ),
       ),
     );
@@ -226,34 +247,34 @@ class _PhoneField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final pillColor =
+        theme.brightness == Brightness.dark ? const Color(0xFF1B1F27) : const Color(0xFFF5F7FA);
+
     return Container(
       width: double.infinity,
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
+        color: pillColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Text(
             dialCode,
-            style: const TextStyle(
+            style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 16,
-              color: Colors.black87,
             ),
           ),
           const SizedBox(width: 6),
-          const Icon(Icons.expand_more, size: 18, color: Colors.black45),
+          Icon(Icons.expand_more, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: .6)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               number,
-              style: const TextStyle(
+              style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: Colors.black87,
               ),
             ),
           ),
@@ -262,4 +283,3 @@ class _PhoneField extends StatelessWidget {
     );
   }
 }
-

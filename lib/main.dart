@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'theme.dart';
 import 'package:flutter/services.dart';
+import 'theme_controller.dart';
 
 // Auth
 import 'screens/signin_screen.dart';
@@ -33,8 +34,15 @@ void main() {
   runApp(const TravelGenieApp());
 }
 
-class TravelGenieApp extends StatelessWidget {
+class TravelGenieApp extends StatefulWidget {
   const TravelGenieApp({super.key});
+
+  @override
+  State<TravelGenieApp> createState() => _TravelGenieAppState();
+}
+
+class _TravelGenieAppState extends State<TravelGenieApp> {
+  final themeController = ThemeController(); // naš kontroler za theme
 
   static const _routes = ['/home', '/trips', '/explore', '/groups', '/profile'];
 
@@ -46,24 +54,18 @@ class TravelGenieApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
-      // za prototip testiraj sa /home; za realni flow koristi /signin
-      // initialLocation: '/home',
-      initialLocation: '/signin',
-
+      initialLocation: '/home',
       routes: [
-        // AUTH rute van Shell-a
         GoRoute(path: '/signin', builder: (_, __) => const SignInScreen()),
         GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
-
-        // SHELL sa zajedničkim navbarom
         ShellRoute(
           builder: (context, state, child) {
             final idx = _indexFromLocation(state.matchedLocation);
             return Scaffold(
-              backgroundColor: const Color(0xFFF7F8FA),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SafeArea(
                 top: true,
-                bottom: false, // bottom već štiti TGNavBar
+                bottom: false,
                 child: child,
               ),
               bottomNavigationBar: TGNavBar(
@@ -134,14 +136,25 @@ class TravelGenieApp extends StatelessWidget {
       ],
     );
 
-    return MaterialApp.router(
-      title: 'TravelGenie',
-      theme: tgTheme(),
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    return AppTheme( // InheritedNotifier iz theme_controller.dart
+      controller: themeController,
+      child: AnimatedBuilder(
+        animation: themeController,
+        builder: (context, _) {
+          return MaterialApp.router(
+            title: 'TravelGenie',
+            theme: tgTheme(),
+            darkTheme: tgDarkTheme(),
+            themeMode: themeController.mode, // ⬅️ kontrolira light/dark
+            routerConfig: router,
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }
+
 
 CustomTransitionPage _transitionPage({
   required LocalKey key,

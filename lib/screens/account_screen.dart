@@ -5,43 +5,45 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // isti mock kao na profilu
+    // MOCK kao na profilu
     const tripsCreated = 5;
     const tripsFinished = 4;
-    const averageBookingCost = 359;
+    const averageBookingCost = 359.0;
+
+    final theme = Theme.of(context);
 
     return CustomScrollView(
       slivers: [
         const SliverToBoxAdapter(child: _TopBar()),
         SliverToBoxAdapter(
           child: Container(
-            color: Colors.white,
+            color: theme.scaffoldBackgroundColor,
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 _AvatarBlock(),
                 SizedBox(height: 12),
               ],
             ),
           ),
         ),
-        // Stats card (isti kao na profilu)
+        // Stats card — identičan princip kao na profilu
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _StatsCard(
               tripsCreated: tripsCreated,
               tripsFinished: tripsFinished,
-              averageCostUSD: averageBookingCost.toDouble(),
+              averageCostUSD: averageBookingCost,
             ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        // LISTA OPCIJA — samo druge stavke
+        // Lista opcija
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: const _SettingsGroup(items: [
+            child: _SettingsGroup(items: const [
               _SettingsItemData(
                 icon: Icons.alternate_email_outlined,
                 label: "Change Email",
@@ -64,8 +66,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: theme.scaffoldBackgroundColor,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       child: Row(
         children: [
@@ -74,19 +77,20 @@ class _TopBar extends StatelessWidget {
             onTap: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
-          const Text(
+          Text(
             "Account",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const Spacer(),
-          // 👇 maknuli smo edit dugme, ostaje prazno mjesto da naslov bude centriran
-          const SizedBox(width: 36), 
+          // ostavljamo prazno da naslov ostane centriran (simetrija sa edit na profilu)
+          const SizedBox(width: 36),
         ],
       ),
     );
   }
 }
-
 
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
@@ -95,6 +99,10 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final chip = isDark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
+
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
@@ -102,17 +110,19 @@ class _CircleIconButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F5F8),
+          color: chip,
           shape: BoxShape.circle,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D000000),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            )
-          ],
+          boxShadow: isDark
+              ? null
+              : const [
+                  BoxShadow(
+                    color: Color(0x0D000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  )
+                ],
         ),
-        child: Icon(icon, size: 18, color: Colors.black87),
+        child: Icon(icon, size: 18, color: theme.colorScheme.onSurface),
       ),
     );
   }
@@ -123,22 +133,30 @@ class _AvatarBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return Column(
-      children: const [
-        CircleAvatar(
+      children: [
+        const CircleAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC),
+          backgroundColor: Color(0xFFFFE3EC), // dekorativno, isto kao na profilu
           child: Icon(Icons.person, size: 44, color: Colors.black54),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           "Tarik",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           "tarik@gmail.com",
-          style: TextStyle(color: Color(0xFF8D929A), fontWeight: FontWeight.w500),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: onSurface.withValues(alpha: 0.6),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -158,36 +176,48 @@ class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: const Color(0xFF6C7480),
-          fontWeight: FontWeight.w600,
-        );
-    final valueStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: const Color(0xFF1061FF),
-          fontWeight: FontWeight.w700,
-        );
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF4FF),
+        color: theme.cardColor, // card po temi (light/dark)
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           _StatCell(
             label: "Trips created",
-            value: Text("$tripsCreated", style: valueStyle),
+            value: Text(
+              "$tripsCreated",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           _DividerY(),
           _StatCell(
             label: "Trips finished",
-            value: Text("$tripsFinished", style: valueStyle),
+            value: Text(
+              "$tripsFinished",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
           _DividerY(),
           _StatCell(
             label: "Average Cost",
-            value: Text("\$${averageCostUSD.toStringAsFixed(0)}", style: valueStyle),
+            value: Text(
+              "\$${averageCostUSD.toStringAsFixed(0)}",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -202,11 +232,21 @@ class _StatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return Expanded(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, textAlign: TextAlign.center),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: onSurface.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           value,
         ],
@@ -218,11 +258,12 @@ class _StatCell extends StatelessWidget {
 class _DividerY extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 1,
       height: 44,
       margin: const EdgeInsets.symmetric(horizontal: 6),
-      color: const Color(0xFFD9E2FF),
+      color: theme.dividerColor, // divider po temi
     );
   }
 }
@@ -233,24 +274,33 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor, // card po temi
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x143C4B64),
-            blurRadius: 14,
-            offset: Offset(0, 8),
-          ),
-        ],
+        boxShadow: isDark
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x143C4B64),
+                  blurRadius: 14,
+                  offset: Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[
             _SettingsRow(data: items[i]),
             if (i != items.length - 1)
-              const Divider(height: 1, thickness: 1, color: Color(0xFFF0F2F6)),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: theme.dividerColor, // divider po temi
+              ),
           ],
         ],
       ),
@@ -275,21 +325,27 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return InkWell(
       onTap: data.onTap ?? () {},
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
-            Icon(data.icon, color: Colors.black54),
+            Icon(data.icon, color: onSurface.withValues(alpha: 0.7)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 data.label,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: onSurface,
+                ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.black38),
+            Icon(Icons.chevron_right, color: onSurface.withValues(alpha: 0.55)),
           ],
         ),
       ),
