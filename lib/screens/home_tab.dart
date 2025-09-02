@@ -221,76 +221,85 @@ class DestinationCard extends StatelessWidget {
       ),
     ];
 
-    return Container(
-      width: 264,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: theme.brightness == Brightness.light ? lightShadows : null,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Container(
-                height: 140,
-                width: double.infinity,
-                color: imageBg,
-                child: Icon(Icons.image_outlined, size: 44, color: onSurface.withValues(alpha: 0.45)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              data.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: onSurface,
-                letterSpacing: -0.1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.star_rounded,
-                    color: Color(0xFFFFC107), size: 18),
-                const SizedBox(width: 4),
-                Text(
-                  "${data.rating}",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap: () => context.push('/place/details'), // 👈 vodi na details
+      child: Container(
+        width: 264,
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: theme.brightness == Brightness.light ? lightShadows : null,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  height: 140,
+                  width: double.infinity,
+                  color: imageBg,
+                  child: Icon(
+                    Icons.image_outlined,
+                    size: 44,
+                    color: onSurface.withValues(alpha: 0.45),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined,
-                    size: 16, color: onSurface.withValues(alpha: 0.6)),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    data.subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: onSurface.withValues(alpha: 0.6),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                data.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: onSurface,
+                  letterSpacing: -0.1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.star_rounded,
+                      color: Color(0xFFFFC107), size: 18),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${data.rating}",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined,
+                      size: 16, color: onSurface.withValues(alpha: 0.6)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      data.subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
 
 class _NewsItemPlaceholder extends StatelessWidget {
   const _NewsItemPlaceholder();

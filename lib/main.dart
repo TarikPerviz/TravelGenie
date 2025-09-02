@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/screens/place_detail_screen.dart';
+import 'package:travelgenie/screens/trip_overview_screen.dart';
 import 'theme.dart';
 import 'package:flutter/services.dart';
 import 'theme_controller.dart';
@@ -129,6 +131,20 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
               pageBuilder: (context, state) => _transitionPage(
                 key: state.pageKey,
                 child: const SettingsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/trips/overview',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const TripOverviewScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/place/details',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const PlaceDetailScreen(),
               ),
             ),
           ],
