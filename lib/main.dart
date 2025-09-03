@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/screens/goals_screen.dart';
 import 'package:travelgenie/screens/place_detail_screen.dart';
+import 'package:travelgenie/screens/search_goals_screen.dart';
 import 'package:travelgenie/screens/trip_overview_screen.dart';
 import 'theme.dart';
 import 'package:flutter/services.dart';
@@ -145,6 +147,20 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
               pageBuilder: (context, state) => _transitionPage(
                 key: state.pageKey,
                 child: const PlaceDetailScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/trips/goals',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const GoalsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/trips/search-goals',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const SearchGoalsScreen(),
               ),
             ),
           ],

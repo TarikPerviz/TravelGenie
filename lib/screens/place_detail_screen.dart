@@ -3,19 +3,21 @@ import 'package:flutter/material.dart';
 class PlaceDetailScreen extends StatelessWidget {
   const PlaceDetailScreen({
     super.key,
-    this.title = 'Schachtelwirt',
-    this.kind = 'Restaurant',
+    this.title = 'Hotel Indigo Vienna',
+    this.kind = 'Hotel',               // 👈 hotel by default
     this.city = 'Vienna, Austria',
-    this.pricePerPerson = 59,
+    this.price = 599,                  // USD
+    this.unitLabel = 'Night',          // 👈 '/Night' for hotels; change to 'Person' for restaurants
     this.rating = 4.7,
     this.reviews = 2498,
   });
 
   final String title;
-  final String kind;
+  final String kind;           // Hotel / Apartment / etc.
   final String city;
-  final int pricePerPerson; // USD
-  final double rating;      // 0..5
+  final int price;             // USD
+  final String unitLabel;      // 'Night' (hotel) | 'Person' (restaurant)
+  final double rating;         // 0..5
   final int reviews;
 
   @override
@@ -24,8 +26,8 @@ class PlaceDetailScreen extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final onSurface = theme.colorScheme.onSurface;
 
-    final heroBg   = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E9EE);
-    final chipBg   = isDark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
+    final heroBg = isDark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E9EE);
+    final chipBg = isDark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
     final boxShadow = isDark
         ? null
         : const [
@@ -40,10 +42,10 @@ class PlaceDetailScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // ====== SCROLLABLE BODY (HERO + SHEET) ===========================
+          // ===== Scroll (hero + sheet) ======================================
           CustomScrollView(
             slivers: [
-              // HERO PLACEHOLDER (slika)
+              // Hero image placeholder
               SliverToBoxAdapter(
                 child: Container(
                   height: 360,
@@ -58,7 +60,7 @@ class PlaceDetailScreen extends StatelessWidget {
                 ),
               ),
 
-              // SHEET kao dio scrolla (rounded top)
+              // Sheet (rounded top) as part of scroll
               SliverToBoxAdapter(
                 child: Container(
                   decoration: BoxDecoration(
@@ -85,7 +87,7 @@ class PlaceDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // Naslov + Show on map
+                        // Title + Show on map
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -125,7 +127,7 @@ class PlaceDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
 
-                        // Meta: lokacija • rating • cijena
+                        // Meta row (location • rating • price)
                         Row(
                           children: [
                             Icon(Icons.location_on_outlined,
@@ -163,14 +165,14 @@ class PlaceDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              '\$$pricePerPerson',
+                              '\$$price',
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             Text(
-                              '/Person',
+                              '/$unitLabel',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: onSurface.withValues(alpha: .6),
                                 fontWeight: FontWeight.w600,
@@ -180,7 +182,7 @@ class PlaceDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // Mini-galerija (placeholders)
+                        // Mini gallery (placeholders)
                         SizedBox(
                           height: 56,
                           child: ListView.separated(
@@ -205,9 +207,9 @@ class PlaceDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
 
-                        // About
+                        // About Hotel
                         Text(
-                          'About Destination',
+                          'About Hotel',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -221,7 +223,7 @@ class PlaceDetailScreen extends StatelessWidget {
                             children: [
                               const TextSpan(
                                 text:
-                                    'A great restaurant with many dishes. Iconic of Vienna and Austria… ',
+                                    'A modern hotel ideal for city breaks. Spacious rooms, great breakfast and family-friendly amenities. Close to public transport and main attractions… ',
                               ),
                               TextSpan(
                                 text: 'Read More',
@@ -235,7 +237,7 @@ class PlaceDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
 
-                        // CTA (dio sadržaja; bez overflowa)
+                        // CTA
                         SafeArea(
                           top: false,
                           minimum: const EdgeInsets.only(bottom: 8),
@@ -244,7 +246,7 @@ class PlaceDetailScreen extends StatelessWidget {
                             height: 54,
                             child: ElevatedButton(
                               onPressed: () {},
-                              child: const Text('Add to Goals'),
+                              child: const Text('Book Now'), // 👈 hotel CTA
                             ),
                           ),
                         ),
@@ -257,7 +259,7 @@ class PlaceDetailScreen extends StatelessWidget {
             ],
           ),
 
-          // ====== FLOATING TOP BAR BUTTONS ==================================
+          // Floating back / heart over hero
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),

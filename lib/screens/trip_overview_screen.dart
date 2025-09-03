@@ -112,11 +112,14 @@ class TripOverviewScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  'Edit',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
+                GestureDetector(
+                  onTap: () => context.push('/trips/goals'), // 👈 vodi na Goals screen
+                  child: Text(
+                    "Edit",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF1061FF),
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ),
               ],
