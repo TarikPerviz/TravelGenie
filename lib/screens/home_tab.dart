@@ -126,7 +126,7 @@ class _TopBar extends StatelessWidget {
                   color: onSurface,
                   size: 20,
                 ),
-                onPressed: () {},
+                onPressed: () => context.push('/notifications'),
               ),
             ),
           ],
