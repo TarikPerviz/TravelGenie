@@ -391,11 +391,15 @@ class _AvatarRow extends StatelessWidget {
               child: CircleAvatar(radius: 16, backgroundColor: c),
             ),
           const Spacer(),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(color: chip, shape: BoxShape.circle),
-            child: Icon(Icons.add, size: 20, color: theme.colorScheme.onSurface),
+          InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () => context.push('/invite'), // 👈 vodi na InviteScreen
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(color: chip, shape: BoxShape.circle),
+              child: Icon(Icons.add, size: 20, color: theme.colorScheme.onSurface),
+            ),
           ),
         ],
       ),

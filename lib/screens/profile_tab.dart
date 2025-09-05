@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/user_avatar.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -18,7 +19,7 @@ class ProfileTab extends StatelessWidget {
         const SliverToBoxAdapter(child: _TopBar()),
         SliverToBoxAdapter(
           child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: theme.scaffoldBackgroundColor,
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             child: Column(
               children: const [
@@ -79,7 +80,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: theme.scaffoldBackgroundColor,
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       child: Row(
         children: [
@@ -153,10 +154,12 @@ class _AvatarBlock extends StatelessWidget {
 
     return Column(
       children: [
-        const CircleAvatar(
+        // ✅ Globalni avatar: veći radius da izgleda “hero”
+        const UserAvatar(
+          isGroup: false,
+          online: true, // možeš staviti false ako ne želiš indikator
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC), // dekorativno, može ostati
-          child: Icon(Icons.person, size: 44, color: Colors.black54),
+          background: Color(0xFFFFE3EC),
         ),
         const SizedBox(height: 10),
         Text(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/screens/add_friend_screen.dart';
+import 'package:travelgenie/screens/chat_screen.dart';
 import 'package:travelgenie/screens/goals_screen.dart';
+import 'package:travelgenie/screens/invite_screen.dart';
 import 'package:travelgenie/screens/notifications_screen.dart';
 import 'package:travelgenie/screens/place_detail_screen.dart';
 import 'package:travelgenie/screens/search_goals_screen.dart';
@@ -169,6 +172,27 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
               pageBuilder: (context, state) => _transitionPage(
                 key: state.pageKey,
                 child: const NotificationsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/chat',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: ChatScreen(chatTitle: (state.extra as String?) ?? 'Group'),
+              ),
+            ),
+            GoRoute(
+              path: '/invite',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const InviteScreen(), // ili InviteScreen(title: 'Invite to Trip')
+              ),
+            ),
+            GoRoute(
+              path: '/groups/add-friend',
+              pageBuilder: (context, state) => _transitionPage(
+                key: state.pageKey,
+                child: const AddFriendScreen(),
               ),
             ),
           ],
