@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/user_avatar.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -65,7 +66,7 @@ class _TopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final surface = theme.colorScheme.surface;
     final onSurface = theme.colorScheme.onSurface;
-    final bg = Theme.of(context).scaffoldBackgroundColor;
+    final bg = theme.scaffoldBackgroundColor;
     final chip = theme.brightness == Brightness.dark
         ? const Color(0xFF1B1F27)
         : const Color(0xFFF3F5F8);
@@ -83,20 +84,19 @@ class _TopBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               onTap: () => context.push('/profile'),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                   color: chip,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundColor: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2A2F3A)
-                          : const Color(0xFFE7EBF0),
-                      child: Icon(Icons.person, size: 16, color: onSurface),
+                    // ✅ Globalni avatar (mini)
+                    const UserAvatar(
+                      isGroup: false,
+                      online: true,
+                      radius: 14, // mali avatar
+                      background: Color(0xFFFFE3EC),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -223,7 +223,7 @@ class DestinationCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(24),
-      onTap: () => context.push('/place/details'), // 👈 vodi na details
+      onTap: () => context.push('/place/details'),
       child: Container(
         width: 264,
         decoration: BoxDecoration(
@@ -245,7 +245,7 @@ class DestinationCard extends StatelessWidget {
                   child: Icon(
                     Icons.image_outlined,
                     size: 44,
-                    color: onSurface.withValues(alpha: 0.45),
+                    color: onSurface.withOpacity(0.45),
                   ),
                 ),
               ),
@@ -278,7 +278,7 @@ class DestinationCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(Icons.location_on_outlined,
-                      size: 16, color: onSurface.withValues(alpha: 0.6)),
+                      size: 16, color: onSurface.withOpacity(0.6)),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -286,7 +286,7 @@ class DestinationCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: onSurface.withValues(alpha: 0.6),
+                        color: onSurface.withOpacity(0.6),
                       ),
                     ),
                   ),
@@ -299,7 +299,6 @@ class DestinationCard extends StatelessWidget {
     );
   }
 }
-
 
 class _NewsItemPlaceholder extends StatelessWidget {
   const _NewsItemPlaceholder();
@@ -339,7 +338,11 @@ class _NewsItemPlaceholder extends StatelessWidget {
                 bottomLeft: Radius.circular(18),
               ),
             ),
-            child: Icon(Icons.image_outlined, size: 28, color: onSurface.withValues(alpha: 0.45)),
+            child: Icon(
+              Icons.image_outlined,
+              size: 28,
+              color: onSurface.withOpacity(0.45),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -365,7 +368,11 @@ class Destination {
   final String title;
   final String subtitle;
   final double rating;
-  const Destination({required this.title, required this.subtitle, required this.rating});
+  const Destination({
+    required this.title,
+    required this.subtitle,
+    required this.rating,
+  });
 }
 
 const _mockDestinations = <Destination>[

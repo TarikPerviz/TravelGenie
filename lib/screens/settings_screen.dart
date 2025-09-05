@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:travelgenie/theme_controller.dart';
+import '../widgets/user_avatar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -59,7 +60,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                     child: Row(
                       children: [
-                        Icon(Icons.dark_mode_outlined, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+                        Icon(
+                          Icons.dark_mode_outlined,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -72,7 +76,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         Switch(
                           value: isDark,
-                          onChanged: (val) => controller.setMode(val ? ThemeMode.dark : ThemeMode.light),
+                          onChanged: (val) =>
+                              controller.setMode(val ? ThemeMode.dark : ThemeMode.light),
                         ),
                       ],
                     ),
@@ -102,7 +107,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                             ),
                           ),
-                          Icon(Icons.chevron_right, color: theme.colorScheme.onSurface.withValues(alpha: 0.55)),
+                          Icon(
+                            Icons.chevron_right,
+                            color: theme.colorScheme.onSurface.withOpacity(0.55),
+                          ),
                         ],
                       ),
                     ),
@@ -194,10 +202,12 @@ class _AvatarBlock extends StatelessWidget {
 
     return Column(
       children: [
-        const CircleAvatar(
+        // ✅ Globalni avatar umjesto lokalnog CircleAvatar-a
+        const UserAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC), // dekorativno kao na profilu
-          child: Icon(Icons.person, size: 44, color: Colors.black54),
+          isGroup: false,
+          online: true,
+          background: Color(0xFFFFE3EC), // možeš promijeniti po želji
         ),
         const SizedBox(height: 10),
         Text(
@@ -210,7 +220,7 @@ class _AvatarBlock extends StatelessWidget {
         Text(
           "tarik@gmail.com",
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: onSurface.withValues(alpha: 0.6),
+            color: onSurface.withOpacity(0.6),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -269,7 +279,7 @@ class _StatCell extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
               fontWeight: FontWeight.w600,
             ),
           ),

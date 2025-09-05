@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/user_avatar.dart';
 
 class TripOverviewScreen extends StatelessWidget {
   const TripOverviewScreen({super.key});
@@ -43,11 +44,14 @@ class TripOverviewScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  'Invite people',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
+                GestureDetector(
+                  onTap: () => context.push('/invite'),
+                  child: Text(
+                    'Invite people',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -177,11 +181,14 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Text(
-            'Invite people',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w700,
+          GestureDetector(
+            onTap: () => context.push('/invite'),
+            child: Text(
+              'Invite people',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -373,8 +380,9 @@ class _AvatarRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chip =
-        theme.brightness == Brightness.dark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E9EE);
+    final chip = theme.brightness == Brightness.dark
+        ? const Color(0xFF2A2F3A)
+        : const Color(0xFFE6E9EE);
 
     return Container(
       height: 52,
@@ -385,15 +393,38 @@ class _AvatarRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          for (final c in [Colors.amber, Colors.pink, Colors.lightBlue])
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: CircleAvatar(radius: 16, backgroundColor: c),
+          // ✅ Globalni avatari umjesto plain krugova
+          const Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: UserAvatar(
+              isGroup: false,
+              online: true,
+              radius: 16,
+              background: Color(0xFFFFE3AC), // topla žuta
             ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: UserAvatar(
+              isGroup: false,
+              online: false,
+              radius: 16,
+              background: Color(0xFFFFEAF1), // roza
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: UserAvatar(
+              isGroup: false,
+              online: true,
+              radius: 16,
+              background: Color(0xFFE6F0FF), // plava pastel
+            ),
+          ),
           const Spacer(),
           InkWell(
             borderRadius: BorderRadius.circular(18),
-            onTap: () => context.push('/invite'), // 👈 vodi na InviteScreen
+            onTap: () => GoRouter.of(context).push('/invite'), // 👈 Invite
             child: Container(
               width: 36,
               height: 36,
@@ -458,7 +489,7 @@ class _InfoCard extends StatelessWidget {
                 child: Icon(
                   Icons.image_outlined,
                   size: 28,
-                  color: onSurface.withValues(alpha: .45),
+                  color: onSurface.withOpacity(.45),
                 ),
               ),
             ),
@@ -471,12 +502,12 @@ class _InfoCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.calendar_today_rounded,
-                          size: 14, color: onSurface.withValues(alpha: .55)),
+                          size: 14, color: onSurface.withOpacity(.55)),
                       const SizedBox(width: 6),
                       Text(
                         dateRange,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: onSurface.withValues(alpha: .55),
+                              color: onSurface.withOpacity(.55),
                               fontWeight: FontWeight.w600,
                             ),
                       ),
@@ -495,7 +526,7 @@ class _InfoCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.location_on_outlined,
-                          size: 16, color: onSurface.withValues(alpha: .6)),
+                          size: 16, color: onSurface.withOpacity(.6)),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -503,7 +534,7 @@ class _InfoCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: onSurface.withValues(alpha: .65),
+                            color: onSurface.withOpacity(.65),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -515,7 +546,7 @@ class _InfoCard extends StatelessWidget {
             ),
 
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right, color: onSurface.withValues(alpha: .55)),
+            Icon(Icons.chevron_right, color: onSurface.withOpacity(.55)),
           ],
         ),
       ),

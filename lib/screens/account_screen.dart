@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/user_avatar.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -84,7 +85,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // ostavljamo prazno da naslov ostane centriran (simetrija sa edit na profilu)
+          // ostavljamo prazno da naslov ostane centriran (simetrija)
           const SizedBox(width: 36),
         ],
       ),
@@ -138,10 +139,12 @@ class _AvatarBlock extends StatelessWidget {
 
     return Column(
       children: [
-        const CircleAvatar(
+        // ✅ Globalni avatar
+        const UserAvatar(
           radius: 42,
-          backgroundColor: Color(0xFFFFE3EC), // dekorativno, isto kao na profilu
-          child: Icon(Icons.person, size: 44, color: Colors.black54),
+          isGroup: false,
+          online: true,
+          background: Color(0xFFFFE3EC),
         ),
         const SizedBox(height: 10),
         Text(
@@ -154,7 +157,7 @@ class _AvatarBlock extends StatelessWidget {
         Text(
           "tarik@gmail.com",
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: onSurface.withValues(alpha: 0.6),
+            color: onSurface.withOpacity(0.6),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -177,7 +180,6 @@ class _StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onSurface = theme.colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -243,7 +245,7 @@ class _StatCell extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: onSurface.withValues(alpha: 0.6),
+              color: onSurface.withOpacity(0.6),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -334,7 +336,7 @@ class _SettingsRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
-            Icon(data.icon, color: onSurface.withValues(alpha: 0.7)),
+            Icon(data.icon, color: onSurface.withOpacity(0.7)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -345,7 +347,7 @@ class _SettingsRow extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: onSurface.withValues(alpha: 0.55)),
+            Icon(Icons.chevron_right, color: onSurface.withOpacity(0.55)),
           ],
         ),
       ),
