@@ -43,3 +43,22 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iOS keys & configs
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Android keys
+**/local.properties
+**/key.properties
+**/*.keystore
+
+# Firebase / Google Services (ako koristiš)
+google-services.json
+GoogleService-Info.plist
+
+# Env files
+.env
+.env.*
