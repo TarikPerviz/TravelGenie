@@ -51,9 +51,10 @@ class ProfileTab extends StatelessWidget {
                 label: "Account",
                 onTap: () => context.push('/profile/account'),
               ),
-              const _SettingsItemData(
+              _SettingsItemData(
                 icon: Icons.favorite_border,
                 label: "Favourite",
+                onTap: () => context.push('/profile/favourites'),
               ),
               const _SettingsItemData(
                 icon: Icons.volunteer_activism_outlined,

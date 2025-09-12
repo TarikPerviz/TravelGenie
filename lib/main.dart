@@ -5,9 +5,11 @@ import 'package:travelgenie/models/stay_search_args.dart';
 import 'package:travelgenie/models/explore_focus_args.dart';
 import 'package:travelgenie/screens/add_friend_screen.dart';
 import 'package:travelgenie/screens/chat_screen.dart';
+import 'package:travelgenie/screens/favourites_screen.dart';
 import 'package:travelgenie/screens/goals_screen.dart';
 import 'package:travelgenie/screens/invite_screen.dart';
 import 'package:travelgenie/screens/notifications_screen.dart';
+import 'package:travelgenie/screens/onboarding_screen.dart';
 import 'package:travelgenie/screens/place_detail_screen.dart';
 import 'package:travelgenie/screens/search_goals_screen.dart';
 import 'package:travelgenie/screens/stay_search_screen.dart';
@@ -67,7 +69,7 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
-      initialLocation: '/home',
+      initialLocation: '/onboarding',
       routes: [
         GoRoute(path: '/signin', builder: (_, __) => const SignInScreen()),
         GoRoute(path: '/signup', builder: (_, __) => const SignUpScreen()),
@@ -96,6 +98,10 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
               ),
             ),
             GoRoute(
+              path: '/onboarding',
+              builder: (context, state) => const OnboardingScreen(),
+            ),
+            GoRoute(
               path: '/trips',
               pageBuilder: (context, state) => _transitionPage(
                 key: state.pageKey,
@@ -109,7 +115,10 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
                 return ExploreTab(focusedId: args?.goalId);
               },
             ),
-
+            GoRoute(
+              path: '/profile/favourites',
+              builder: (context, state) => const FavouritesScreen(),
+            ),
             GoRoute(
               path: '/groups',
               pageBuilder: (context, state) => _transitionPage(
