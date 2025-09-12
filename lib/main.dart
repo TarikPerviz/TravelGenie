@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/models/place_details_args.dart';
 import 'package:travelgenie/models/stay_search_args.dart';
+import 'package:travelgenie/models/explore_focus_args.dart';
 import 'package:travelgenie/screens/add_friend_screen.dart';
 import 'package:travelgenie/screens/chat_screen.dart';
 import 'package:travelgenie/screens/goals_screen.dart';
@@ -102,11 +104,12 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
             ),
             GoRoute(
               path: '/explore',
-              pageBuilder: (context, state) => _transitionPage(
-                key: state.pageKey,
-                child: const ExploreTab(),
-              ),
+              builder: (context, state) {
+                final args = state.extra as ExploreFocusArgs?;
+                return ExploreTab(focusedId: args?.goalId);
+              },
             ),
+
             GoRoute(
               path: '/groups',
               pageBuilder: (context, state) => _transitionPage(
@@ -212,8 +215,25 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
                 return MaterialPage(
                   child: StaySearchScreen(preset: args), // ⬅️ prosleđujemo preset
                 );
-  },
-),
+              },
+            ),
+            GoRoute(
+              path: '/place/details',
+              builder: (context, state) {
+                final args = state.extra as PlaceDetailsArgs?;
+                return PlaceDetailScreen(
+                  title: args?.title ?? 'Hotel Indigo Vienna',
+                  kind: args?.kind ?? 'Hotel',
+                  city: args?.city ?? 'Vienna, Austria',
+                  price: args?.price ?? 599,
+                  unitLabel: args?.unitLabel ?? 'Night',
+                  rating: args?.rating ?? 4.7,
+                  reviews: args?.reviews ?? 2498,
+                  selectable: args?.selectable ?? false,
+                );
+              },
+            ),
+
 
           ],
         ),

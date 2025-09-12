@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/models/place_details_args.dart';
 import '../widgets/user_avatar.dart';
 
 class HomeTab extends StatelessWidget {
@@ -223,7 +224,18 @@ class DestinationCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(24),
-      onTap: () => context.push('/place/details'),
+      onTap: () => context.push('/place/details',
+          extra: const PlaceDetailsArgs(
+            title: 'Hotel Indigo Vienna',
+            kind: 'Hotel',
+            city: 'Vienna, Austria',
+            price: 599,
+            unitLabel: 'Night',
+            rating: 4.7,
+            reviews: 2498,
+            selectable: false, // 👈 ostaje “browse/book”
+          ),
+      ),
       child: Container(
         width: 264,
         decoration: BoxDecoration(

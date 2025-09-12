@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/models/place_details_args.dart';
+
 import '../widgets/user_avatar.dart';
+import '../models/trip_overview_args.dart';
+import '../models/stay_search_args.dart';
 
 class TripOverviewScreen extends StatelessWidget {
   const TripOverviewScreen({super.key});
@@ -10,10 +14,33 @@ class TripOverviewScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
 
+    // ⬇️ PROČITAJ ARGUMENTE (ako je došao StaySelection iz details screena)
+    final args = GoRouterState.of(context).extra as TripOverviewArgs?;
+    final selected = args?.selectedStay;
+
+    // ⬇️ Izvedene vrijednosti za karticu "My Stay"
+    final stayTitle = selected?.title ?? 'Hotel Indigo Vienna';
+    final staySubtitle = selected != null
+        ? '${selected.city}, ${selected.country}'
+        : 'Vienna, Austria';
+
+    // helper da otvorimo Stay Search s presetom
+    void openStaySearch() {
+      context.push(
+        '/search/stay',
+        extra: StaySearchArgs(
+          location: selected != null
+              ? '${selected.city}, ${selected.country}'
+              : 'Vienna, Austria',
+          range: null, // TODO: proslijedi stvarne datume kada ih budeš imao
+          people: 2,   // TODO: proslijedi stvaran broj ljudi iz tripa
+        ),
+      );
+    }
+
     return CustomScrollView(
       slivers: [
-        const SliverToBoxAdapter(child: _TopBar()),
-
+        SliverToBoxAdapter(child: _TopBar()),
         // Title
         SliverToBoxAdapter(
           child: Padding(
@@ -21,7 +48,6 @@ class TripOverviewScreen extends StatelessWidget {
             child: _HeroTitle(),
           ),
         ),
-
         // Month capsule (simplified calendar)
         SliverToBoxAdapter(
           child: Padding(
@@ -79,11 +105,14 @@ class TripOverviewScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  'Change',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
+                GestureDetector(
+                  onTap: openStaySearch,
+                  child: Text(
+                    'Change',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -95,9 +124,23 @@ class TripOverviewScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _InfoCard(
               dateRange: '17–21 February 2025',
-              title: 'Hotel Indigo Vienna',
-              subtitle: 'Vienna, Austria',
-              onTap: () => context.push('/place/details'),
+              title: stayTitle,
+              subtitle: staySubtitle,
+              onTap: () {
+                context.push(
+                  '/place/details',
+                  extra: PlaceDetailsArgs(
+                    title: stayTitle,
+                    kind: 'Hotel',           // ili izvedi iz state-a ako ga imaš
+                    city: staySubtitle,
+                    price: 599,              // mock dok ne dođe API
+                    unitLabel: 'Night',
+                    rating: 4.7,
+                    reviews: 2498,
+                    selectable: false,       // 👈 BOOK varijanta
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -159,8 +202,6 @@ class TripOverviewScreen extends StatelessWidget {
 // ───────────────────────────────── Top bar ─────────────────────────────────
 
 class _TopBar extends StatelessWidget {
-  const _TopBar();
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

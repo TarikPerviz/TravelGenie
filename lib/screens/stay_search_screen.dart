@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:travelgenie/models/stay_search_args.dart';
 
+import 'package:travelgenie/models/stay_search_args.dart';
+import '../models/place_details_args.dart';
+import '../models/stay_selection.dart';
+import '../models/trip_overview_args.dart';
 
 class StaySearchScreen extends StatefulWidget {
-  /// Legacy opcionalni parametri (zadržaćemo radi kompatibilnosti)
+  /// Legacy opcionalni parametri
   final String? location;
   final DateTimeRange? dates;
   final int? people;
 
-  /// NOVO: preset paket (ima prioritet nad pojedinačnim legacy poljima)
+  /// NOVO: preset (ima prioritet nad legacy poljima)
   final StaySearchArgs? preset;
 
   const StaySearchScreen({
@@ -27,11 +30,11 @@ class StaySearchScreen extends StatefulWidget {
 class _StaySearchScreenState extends State<StaySearchScreen> {
   final _search = TextEditingController();
 
-  // ── Preset state (za prikaz i čišćenje chipova)
+  // Preset state (za chipove)
   DateTimeRange? _presetRange;
   int? _presetPeople;
 
-  // ── Filter state
+  // Filter state
   RangeValues _price = const RangeValues(40, 900);
   final Set<String> _types = <String>{}; // multi-select
   bool _pool = false;
@@ -43,7 +46,6 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
   void initState() {
     super.initState();
 
-    // Ako postoji preset, on ima prioritet
     if (widget.preset != null) {
       final p = widget.preset!;
       _search.text = p.location;
@@ -52,7 +54,6 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
       return;
     }
 
-    // U suprotnom, koristi legacy pojedinačne parametre
     if (widget.location != null && widget.location!.isNotEmpty) {
       _search.text = widget.location!;
     }
@@ -62,7 +63,6 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
 
   int get _activeFilterCount {
     int n = 0;
-    // Price active if not full span
     if (_price.start > 0 || _price.end < 1000) n++;
     n += _types.isNotEmpty ? 1 : 0;
     n += [_pool, _parking, _freeCancel, _petFriendly].where((b) => b).length;
@@ -75,84 +75,78 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
     super.dispose();
   }
 
-  // ── Primijeni filtere na mock listu
+  // ── Filtriranje + robusna pretraga
   List<_Stay> get _filtered {
-  // normalizacija: mala slova, zadrži slova/cifre/razmake, sve ostalo ukloni
-  String normalize(String input) =>
-      input.toLowerCase().replaceAll(RegExp(r'[^a-z0-9 ]'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    String normalize(String input) => input
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9 ]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
 
-  final query = normalize(_search.text);
-  final tokens = query.isEmpty ? const <String>[] : query.split(' ');
+    final query = normalize(_search.text);
+    final tokens = query.isEmpty ? const <String>[] : query.split(' ');
 
-  return _mockStays.where((s) {
-    // haystack: spoj title/city/country pa normalizuj
-    final hay = normalize('${s.title} ${s.city} ${s.country}');
+    return _mockStays.where((s) {
+      final hay = normalize('${s.title} ${s.city} ${s.country}');
+      if (tokens.isNotEmpty && !tokens.every(hay.contains)) return false;
 
-    // svaki token mora postojati u haystack-u (AND pretraga)
-    if (tokens.isNotEmpty && !tokens.every(hay.contains)) return false;
+      if (s.pricePerPerson < _price.start || s.pricePerPerson > _price.end) {
+        return false;
+      }
+      if (_types.isNotEmpty && !_types.contains(s.type)) return false;
 
-    // cijena
-    if (s.pricePerPerson < _price.start || s.pricePerPerson > _price.end) return false;
+      if (_pool && !s.pool) return false;
+      if (_parking && !s.parking) return false;
+      if (_freeCancel && !s.freeCancel) return false;
+      if (_petFriendly && !s.petFriendly) return false;
 
-    // tip smještaja
-    if (_types.isNotEmpty && !_types.contains(s.type)) return false;
-
-    // ameniteti
-    if (_pool && !s.pool) return false;
-    if (_parking && !s.parking) return false;
-    if (_freeCancel && !s.freeCancel) return false;
-    if (_petFriendly && !s.petFriendly) return false;
-
-    return true;
-  }).toList();
-}
-
-
+      return true;
+    }).toList();
+  }
 
   void _openFilters() async {
-  final theme = Theme.of(context);
+    final theme = Theme.of(context);
 
-  final result = await showModalBottomSheet<_FiltersResult>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: theme.colorScheme.surface,
-    showDragHandle: true,
-    builder: (ctx) {
-      return DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.9, // zauzmi 90% visine
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) {
-          return _FiltersSheet(
-            scrollController: scrollController,        // ⬅️ VAŽNO
-            initialPrice: _price,
-            initialTypes: _types,
-            pool: _pool,
-            parking: _parking,
-            freeCancel: _freeCancel,
-            petFriendly: _petFriendly,
-          );
-        },
-      );
-    },
-  );
+    final result = await showModalBottomSheet<_FiltersResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: theme.colorScheme.surface,
+      showDragHandle: true,
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return _FiltersSheet(
+              scrollController: scrollController,
+              initialPrice: _price,
+              initialTypes: _types,
+              pool: _pool,
+              parking: _parking,
+              freeCancel: _freeCancel,
+              petFriendly: _petFriendly,
+            );
+          },
+        );
+      },
+    );
 
-  if (result != null) {
-    setState(() {
-      _price = result.price;
-      _types
-        ..clear()
-        ..addAll(result.types);
-      _pool = result.pool;
-      _parking = result.parking;
-      _freeCancel = result.freeCancel;
-      _petFriendly = result.petFriendly;
-    });
+    if (result != null) {
+      setState(() {
+        _price = result.price;
+        _types
+          ..clear()
+          ..addAll(result.types);
+        _pool = result.pool;
+        _parking = result.parking;
+        _freeCancel = result.freeCancel;
+        _petFriendly = result.petFriendly;
+      });
+    }
   }
-}
-
 
   void _clearDatesChip() => setState(() => _presetRange = null);
   void _clearPeopleChip() => setState(() => _presetPeople = null);
@@ -163,9 +157,8 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final on = theme.colorScheme.onSurface;
-    final chipBg = theme.brightness == Brightness.dark
-        ? const Color(0xFF1B1F27)
-        : const Color(0xFFF3F5F8);
+    final chipBg =
+        theme.brightness == Brightness.dark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -181,28 +174,20 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
                     borderRadius: BorderRadius.circular(20),
                     onTap: () => context.pop(),
                     child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration:
-                          BoxDecoration(color: chipBg, shape: BoxShape.circle),
-                      child: Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 18, color: on),
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(color: chipBg, shape: BoxShape.circle),
+                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: on),
                     ),
                   ),
                   const Spacer(),
-                  Text('Search',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  Text('Search', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                   const Spacer(),
                   GestureDetector(
                     onTap: () => context.pop(),
-                    child: Text(
-                      'Cancel',
+                    child: Text('Cancel',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                        color: theme.colorScheme.primary, fontWeight: FontWeight.w700,
+                      )),
                   ),
                 ],
               ),
@@ -214,7 +199,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
               child: _HeroTitle(),
             ),
 
-            // Search field + Filters button
+            // Search + Filters
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
@@ -228,8 +213,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
                           hintText: 'Search Places',
-                          prefixIcon:
-                              Icon(Icons.search, color: on.withOpacity(.6)),
+                          prefixIcon: Icon(Icons.search, color: on.withOpacity(.6)),
                         ),
                       ),
                     ),
@@ -251,8 +235,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
                           if (_activeFilterCount > 0) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.primary,
                                 borderRadius: BorderRadius.circular(10),
@@ -275,7 +258,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
               ),
             ),
 
-            // Preset chips (ako postoje)
+            // Preset chips
             if (_presetRange != null || _presetPeople != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -288,8 +271,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
                       if (_presetRange != null)
                         _SmallClosableChip(
                           icon: Icons.calendar_today_rounded,
-                          label:
-                              '${_fmt(_presetRange!.start)} – ${_fmt(_presetRange!.end)}',
+                          label: '${_fmt(_presetRange!.start)} – ${_fmt(_presetRange!.end)}',
                           onClose: _clearDatesChip,
                         ),
                       if (_presetPeople != null)
@@ -310,8 +292,7 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Search for your stay',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
             ),
@@ -321,13 +302,39 @@ class _StaySearchScreenState extends State<StaySearchScreen> {
               child: GridView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  mainAxisExtent: 236,
+                  crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, mainAxisExtent: 236,
                 ),
                 itemCount: _filtered.length,
-                itemBuilder: (_, i) => _StayCard(stay: _filtered[i]),
+                itemBuilder: (_, i) {
+                  final stay = _filtered[i];
+                  return _StayCard(
+                    stay: stay,
+                    onTap: () async {
+                      // Otvori details u selekcijskom modu
+                      final sel = await context.push(
+                        '/place/details',
+                        extra: PlaceDetailsArgs(
+                          title: stay.title,
+                          kind: stay.type, // npr. "Hotel"
+                          city: '${stay.city}, ${stay.country}',
+                          price: stay.pricePerPerson.round(),
+                          unitLabel: 'Night',
+                          rating: stay.rating,
+                          reviews: 1200, // mock
+                          selectable: true, // 👈 omogući "Select this stay"
+                        ),
+                      );
+
+                      if (sel is StaySelection) {
+                        // Po želji odmah vodi na Trip Overview sa odabranim stay-em
+                        context.push(
+                          '/trips/overview',
+                          extra: TripOverviewArgs(selectedStay: sel),
+                        );
+                      }
+                    },
+                  );
+                },
               ),
             ),
           ],
@@ -405,7 +412,6 @@ class _FiltersResult {
 }
 
 class _FiltersSheet extends StatefulWidget {
-  // Opcionalno: ako koristiš DraggableScrollableSheet, možeš proslediti controller.
   final ScrollController? scrollController;
 
   final RangeValues initialPrice;
@@ -450,7 +456,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final on = theme.colorScheme.onSurface;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom; // tastatura
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return SafeArea(
       child: Column(
@@ -460,12 +466,8 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Row(
               children: [
-                Text(
-                  'Filters',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+                Text('Filters',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                 const Spacer(),
                 TextButton(onPressed: _reset, child: const Text('Reset')),
               ],
@@ -479,20 +481,14 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
               children: [
                 // Price
-                Text(
-                  'Price per person',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Text('Price per person',
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('\$${_price.start.round()}',
-                        style: theme.textTheme.labelLarge),
-                    Text('\$${_price.end.round()}',
-                        style: theme.textTheme.labelLarge),
+                    Text('\$${_price.start.round()}', style: theme.textTheme.labelLarge),
+                    Text('\$${_price.end.round()}', style: theme.textTheme.labelLarge),
                   ],
                 ),
                 RangeSlider(
@@ -509,12 +505,8 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                 const SizedBox(height: 12),
 
                 // Types (multi-select)
-                Text(
-                  'Type',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Text('Type',
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -545,12 +537,8 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                 const SizedBox(height: 16),
 
                 // Amenities
-                Text(
-                  'Amenities',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                Text('Amenities',
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 _AmenityRow(
                   label: 'With pool',
@@ -621,9 +609,7 @@ class _ChoiceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final off = theme.brightness == Brightness.dark
-        ? const Color(0xFF1B1F27)
-        : const Color(0xFFF3F5F8);
+    final off = theme.brightness == Brightness.dark ? const Color(0xFF1B1F27) : const Color(0xFFF3F5F8);
     final bg = selected ? theme.colorScheme.primary : off;
     final fg = selected ? Colors.white : theme.colorScheme.onSurface;
 
@@ -632,16 +618,10 @@ class _ChoiceChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(18),
-        ),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(18)),
         child: Text(
           label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: fg,
-            fontWeight: FontWeight.w700,
-          ),
+          style: theme.textTheme.labelLarge?.copyWith(color: fg, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -667,13 +647,10 @@ class _AmenityRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              label,
+            child: Text(label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: on,
-              ),
-            ),
+                fontWeight: FontWeight.w600, color: on,
+              )),
           ),
           Switch(value: value, onChanged: onChanged),
         ],
@@ -682,34 +659,25 @@ class _AmenityRow extends StatelessWidget {
   }
 }
 
-
 /* ─────────────────────────  Hero title  ───────────────────────── */
 
 class _HeroTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final base = theme.textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w800,
-    );
+    final base = theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20), // razmak lijevo/desno
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: RichText(
-        textAlign: TextAlign.center, // centriraj tekst
+        textAlign: TextAlign.center,
         text: TextSpan(
           style: base?.copyWith(color: theme.colorScheme.onSurface),
           children: [
             const TextSpan(text: "Let's find your "),
-            TextSpan(
-              text: "perfect stay",
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
+            TextSpan(text: "perfect stay", style: TextStyle(color: theme.colorScheme.primary)),
             const TextSpan(text: " for your next "),
-            const TextSpan(
-              text: "trip!",
-              style: TextStyle(color: Color(0xFFFF7A00)),
-            ),
+            const TextSpan(text: "trip!", style: TextStyle(color: Color(0xFFFF7A00))),
           ],
         ),
       ),
@@ -717,31 +685,26 @@ class _HeroTitle extends StatelessWidget {
   }
 }
 
-
-/* ─────────────────────────  MOCK: card & data  ───────────────────────── */
+/* ─────────────────────────  Card & mock data  ───────────────────────── */
 
 class _StayCard extends StatelessWidget {
   final _Stay stay;
-  const _StayCard({required this.stay});
+  final VoidCallback onTap;
+  const _StayCard({required this.stay, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final on = theme.colorScheme.onSurface;
-    final imageBg =
-        theme.brightness == Brightness.dark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E9EE);
+    final imageBg = theme.brightness == Brightness.dark ? const Color(0xFF2A2F3A) : const Color(0xFFE6E9EE);
 
     final lightShadow = const [
-      BoxShadow(
-        color: Color(0x143C4B64),
-        blurRadius: 14,
-        offset: Offset(0, 8),
-      ),
+      BoxShadow(color: Color(0x143C4B64), blurRadius: 14, offset: Offset(0, 8)),
     ];
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => context.push('/place/details'), // placeholder
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
@@ -752,48 +715,31 @@ class _StayCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                height: 112,
-                width: double.infinity,
-                color: imageBg,
-                child: Icon(Icons.image_outlined,
-                    size: 32, color: on.withOpacity(.45)),
+                height: 112, width: double.infinity, color: imageBg,
+                child: Icon(Icons.image_outlined, size: 32, color: on.withOpacity(.45)),
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              stay.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            Text(stay.title,
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            Text(
-              '${stay.city}, ${stay.country}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Text('${stay.city}, ${stay.country}',
+              maxLines: 1, overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: on.withOpacity(.65),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+                color: on.withOpacity(.65), fontWeight: FontWeight.w600)),
             const Spacer(),
             Row(
               children: [
                 const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 18),
                 const SizedBox(width: 4),
-                Text('${stay.rating}',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w700)),
+                Text('${stay.rating}', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
                 const Spacer(),
                 Text('\$${stay.pricePerPerson.toStringAsFixed(0)}',
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w800)),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800)),
               ],
             ),
           ],
@@ -860,8 +806,6 @@ const _mockStays = <_Stay>[
     rating: 4.2,
     pricePerPerson: 35,
     type: 'Hostels',
-    freeCancel: false,
-    petFriendly: false,
   ),
   _Stay(
     title: 'Belvedere Vacation Home',
@@ -871,7 +815,6 @@ const _mockStays = <_Stay>[
     pricePerPerson: 150,
     type: 'Vacation Homes',
     pool: true,
-    parking: false,
     freeCancel: true,
   ),
   _Stay(
