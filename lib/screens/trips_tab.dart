@@ -64,7 +64,7 @@ class TripsTab extends StatelessWidget {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.push('/trips/create'),
                   child: const Text('Create a trip'),
                 ),
               ),

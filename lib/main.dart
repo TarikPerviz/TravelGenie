@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:travelgenie/models/stay_search_args.dart';
 import 'package:travelgenie/screens/add_friend_screen.dart';
 import 'package:travelgenie/screens/chat_screen.dart';
 import 'package:travelgenie/screens/goals_screen.dart';
@@ -7,6 +8,8 @@ import 'package:travelgenie/screens/invite_screen.dart';
 import 'package:travelgenie/screens/notifications_screen.dart';
 import 'package:travelgenie/screens/place_detail_screen.dart';
 import 'package:travelgenie/screens/search_goals_screen.dart';
+import 'package:travelgenie/screens/stay_search_screen.dart';
+import 'package:travelgenie/screens/trip_create_screen.dart';
 import 'package:travelgenie/screens/trip_overview_screen.dart';
 import 'theme.dart';
 import 'package:flutter/services.dart';
@@ -195,6 +198,23 @@ class _TravelGenieAppState extends State<TravelGenieApp> {
                 child: const AddFriendScreen(),
               ),
             ),
+            GoRoute(
+              path: '/trips/create',
+              pageBuilder: (context, state) => MaterialPage(
+                key: state.pageKey,
+                child: const CreateTripScreen(), // 👈 koristi ime klase koje stvarno postoji
+              ),
+            ),
+            GoRoute(
+              path: '/search/stay',
+              pageBuilder: (context, state) {
+                final args = state.extra is StaySearchArgs ? state.extra as StaySearchArgs : null;
+                return MaterialPage(
+                  child: StaySearchScreen(preset: args), // ⬅️ prosleđujemo preset
+                );
+  },
+),
+
           ],
         ),
       ],
